@@ -1,0 +1,14 @@
+[Unit]
+Description=Display song and artist information on OLED
+After=syslog.target network.target sound.target
+
+[Service]
+User=root
+Group=root
+
+Type=simple
+ExecStart=/usr/bin/python3 /opt/moOde_OLED/moOde_OLED.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

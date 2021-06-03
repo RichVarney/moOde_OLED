@@ -12,6 +12,17 @@ from luma.core.virtual import viewport
 from PIL import ImageFont
 
 
+""" This script runs two threads and one main loop. 
+The first thread prints two predefined global variables to the OLED display and will scroll the text along the display
+The second thread constantly queries the shairport-sync-metadata FIFO file for song and artist information, adding it to
+ a queue
+The main loop periodically gets the music status (playing, mpd output or airplay output) and redfines the global 
+variables that are to be printed on the OLED. As soon as a change is detected, (like going from sleep to airplay) the 
+OLED will finish scrolling the previous text across the screen and then change to the updated information"""
+
+# TODO speed up transition between audio types
+# TODO future; get song info from radio station m3u8 file/ connection
+
 shairport_metadata = os.path.abspath('/tmp/shairport-sync-metadata')
 currentsong = os.path.abspath('/var/local/www/currentsong.txt')
 song_info = {}
@@ -20,7 +31,7 @@ song_info = {}
 serial = i2c(port=1, address=0x3C)
 device = sh1106(serial, rotate=2)
 fontsize = 24
-font_century = ImageFont.truetype('./fonts/century_gothic.ttf', fontsize)
+font_century = ImageFont.truetype('/opt/moOde_OLED/fonts/century_gothic.ttf', fontsize)
 global first_line
 first_line = 'moOde'
 global second_line
@@ -46,7 +57,7 @@ def print_to_OLED(font=font_century, speed=4):
 
         i = 0
         while i < dw + max(h_first_line, h_second_line):  # scroll for an entire width, plus a bit (h)
-            # hold position for 1 second
+            # hold position for 2 seconds
             if i == 0:
                 time.sleep(2)
             virtual.set_position((i, 0))
@@ -136,9 +147,6 @@ print_thread = threading.Thread(target=print_to_OLED, args=())
 print_thread.start()
 get_shairport_data_thread = threading.Thread(target=get_shairport_data, args=())
 get_shairport_data_thread.start()
-
-# TODO speed up transition between audio types
-# TODO future; get song info from radio station m3u8 file/ connection
 
 while True:
     try:

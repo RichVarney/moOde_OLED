@@ -80,7 +80,7 @@ def get_shairport_data():
         try:
             time.sleep(time_to_sleep - ((time.time() - starttime) % time_to_sleep))
             xml_string = ''  # start with an empty string
-            with open(shairport_metadata, 'r') as fifo:
+            with open(shairport_metadata, 'w+') as fifo:
                 for line in fifo:
                     # reset xml_string back to an empty string whenever a new line (<item>) comes along
                     if '<item>' in line:
